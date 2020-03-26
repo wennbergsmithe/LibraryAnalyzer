@@ -1,6 +1,6 @@
 # AnalyisiLib.py
 # Written by Elijah Wennberg-Smith
-# Last Edited: 3.15.20
+# Last Edited: 3.26.20
 
 from Track import Track
 from ItunesParser import iTunesParser
@@ -13,7 +13,9 @@ from os import path
 
 # Updates database from a pre-exported file in the lib_backups directory. 
 # Itunes no longer automatically update the xml file, so it must be exported manually through itunes app. 
-# command: u <file name>
+# command: u <file name>/<"a">
+#	- a adds all files in lib_backups in order given they are labeled 1.xml, 2.xml, ..., n.xml
+
 def updateDBFromXML(arg):
 	if(arg != "a"):
 		fp = "lib_backups/" + arg
@@ -111,7 +113,7 @@ def SongSkipProbability(x, asc=1, zeros_ones=0):
 	# Also displays the ratio of skips to plays
 	# Set asc=1 to list in ascending order, asc=0 for descending.
 	# Set zeros_ones=1 to include arists with values of 0 or 1. In large datasets there can be an overwheling number of both.
-
+	# command: sprob <x = length> < asc = boolean for ascending or descending> <zeros_ones = boolean to include probs of 0 or 1>
 	if asc:
 		ordr = "ASC"
 	else:
@@ -140,7 +142,8 @@ def GenreSkipProbability(x, asc=1, zeros_ones=0):
 	# Also displays the ratio of skips to plays
 	# Set asc=1 to list in ascending order, asc=0 for descending.
 	# Set zeros_ones=1 to include arists with values of 0 or 1. In large datasets there can be an overwheling number of both.
-
+	# command: gprob <x = length> < asc = boolean for ascending or descending> <zeros_ones = boolean to include probs of 0 or 1>
+	
 	if asc:
 		ordr = "ASC"
 	else:
@@ -168,7 +171,8 @@ def ArtistSkipProbability(x, asc=1, zeros_ones=0):
 	# Also displays the ratio of skips to plays
 	# Set asc=1 to list in ascending order, asc=0 for descending.
 	# Set zeros_ones=1 to include arists with values of 0 or 1. In large datasets there can be an overwheling number of both.
-
+	# command: aprob <x = length> < asc = boolean for ascending or descending> <zeros_ones = boolean to include probs of 0 or 1>
+	
 	if asc:
 		ordr = "ASC"
 	else:
@@ -192,7 +196,9 @@ def ArtistSkipProbability(x, asc=1, zeros_ones=0):
 					break
 
 
-def NumSongsByYear(x):
+def NumSongsByYear(x=10):
+	# prints top x years based on number of songs
+	# command sby <x = length>
 	db = DBConnector()
 	db.query("SELECT COUNT(id) AS sm, year FROM library GROUP BY year ORDER BY sm DESC LIMIT " + str(x) + ";")
 	ret = db.rs
@@ -208,6 +214,9 @@ def NumSongsByYear(x):
 		print()
 
 def MonthsBySongsAdded():
+	# produces a chart of total songs added for each month of the year
+	# command: monchart
+
 	db = DBConnector()
 	db.query("SELECT count(id) AS cnt, MONTH(date_added) AS month FROM library GROUP BY MONTH(date_added) ORDER BY month ASC ;")
 	ret = db.rs
@@ -224,7 +233,9 @@ def MonthsBySongsAdded():
 	plt.xticks(x, ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec',))
 	plt.show()
 
-def TopXGenresBySongs(x):
+def TopXGenresBySongs(x=10):
+	#top x genres by the number of songs in that genre
+	# command: gbs <x - optional list len>
 	db = DBConnector()
 	db.query("SELECT COUNT(id) AS cnt, genre FROM library GROUP BY genre ORDER BY cnt DESC LIMIT " + str(x) + ";")
 	ret = db.rs
@@ -238,8 +249,9 @@ def TopXGenresBySongs(x):
 		print("Number Of Songs: " + str(song["cnt"]))
 		print()
 
-def TopXSongsByPlays(x):
+def TopXSongsByPlays(x=10):
 	# top x songs by play count
+	# command sbp <optional x list len>
 	if(x<1):
 		return
 
@@ -257,7 +269,5 @@ def TopXSongsByPlays(x):
 		print("Play Count: " + str(song['play_count']))
 		print()
 
-
-TopXGenresBySongs(100)
 
 

@@ -2,16 +2,14 @@
 # Written by Elijah Wennberg-Smith
 # Last Edited: 3.26.20
 
-from Track import Track
 from ItunesParser import iTunesParser
 from SQLConnector import DBConnector
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter
-from os import path
 import re
 
 def PlayListUnheard(x=50, genre="recent", since=1900):
+	# generates a playlist of songs that have not been heard before. 
+	# pass x for list len, genre to specify genre(x most recent are used as default), and min year released for playlist.
+	# prints artist and song
 	dbc = DBConnector()
 	db2 = DBConnector()
 	i = 0

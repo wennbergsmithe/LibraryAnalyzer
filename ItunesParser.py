@@ -1,6 +1,6 @@
 # ItunesParser.py
 # Written by Elijah Wennberg-Smith 
-# Last Edited: 3.12.20
+# Last Edited: 3.26.20
 #
 # This class parses the Apple Music XML file, groups songs into Track objects,
 # then pushes library changes to the database.

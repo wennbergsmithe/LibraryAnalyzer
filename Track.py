@@ -1,6 +1,6 @@
 # Track.py
 # Written by Elijah Wennberg-Smith 
-# Last Edited: 3.12.20
+# Last Edited: 3.26.20
 #
 # Track UDT used for storing track data at runtime
 

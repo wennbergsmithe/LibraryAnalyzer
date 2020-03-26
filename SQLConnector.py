@@ -1,6 +1,6 @@
 # SQLConnector.py
 # Written by Elijah Wennberg-Smith 
-# Last Edited: 3.12.20
+# Last Edited: 3.26.20
 #
 # This class is a wrapper for the mysql connector class, tailored for Library Analyzer. 
 
@@ -16,7 +16,7 @@ class DBConnector():
 		self.connection = mysql.connector.connect(host='localhost',
 									 database='MusicData',
 									 user='eli',
-									 password='pass',
+									 password='pass', #secure
 									 auth_plugin='mysql_native_password')
 	
 		if(self.connection.is_connected()):
