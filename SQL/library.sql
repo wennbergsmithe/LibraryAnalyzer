@@ -1,0 +1,30 @@
+CREATE TABLE library (
+	id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+	name VARCHAR(255) NOT NULL,
+	artist VARCHAR(255) DEFAULT NULL,
+	album VARCHAR(255) DEFAULT NULL,
+	album_artist VARCHAR(255) DEFAULT NULL,
+	comp VARCHAR(255) DEFAULT NULL,
+	genre VARCHAR(255) DEFAULT NULL,
+	kind VARCHAR(255) DEFAULT NULL,
+	total_time INTEGER DEFAULT 0,
+	track_num INTEGER DEFAULT 0,
+	track_count INTEGER DEFAULT 0,
+	year INTEGER DEFAULT NULL,
+	play_date DATETIME DEFAULT NULL,
+	date_mod DATETIME DEFAULT NULL,
+	play_count INTEGER DEFAULT NULL,
+	rel_date DATETIME DEFAULT NULL,
+	skip_count INTEGER DEFAULT 0,
+	date_added DATETIME DEFAULT NULL
+);
+
+CREATE INDEX idx ON library (artist);
+
+CREATE TABLE listening_history (
+	record_id integer NOT NULL auto_increment primary key,
+	track_id integer NOT NULL,
+	listen_date DATETIME NOT NULL,
+	listen_count INTEGER DEFAULT 0
+);
+ 
