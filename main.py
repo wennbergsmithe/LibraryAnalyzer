@@ -226,9 +226,6 @@ def main():
 
 		elif(u_input == "q"):
 			done = True
-
-
-
 		else:
 			print("Invalid command. enter " + '"' + 'h' + '"' + " for a list of commands.")
 

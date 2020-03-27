@@ -32,7 +32,7 @@ def PlayListUnheard(x=50, genre="recent", since=1900):
 				name = row2["name"]
 				artist = row2["artist"]
 
-				print("#" + str(i) + "===========================")
+				print("#" + str(i) + " ===========================")
 				print("\tSong: " + name)
 				print("\tArtist: " + artist)
 			
@@ -52,7 +52,7 @@ def PlayListUnheard(x=50, genre="recent", since=1900):
 			artist = row2["artist"]
 			genre = row2["genre"]
 
-			print("#" + str(i) + "===========================")
+			print("#" + str(i) + " ===========================")
 			print("\tSong: " + name)
 			print("\tArtist: " + artist)
 			print("\tGenre:" + genre)
