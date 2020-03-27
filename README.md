@@ -6,20 +6,21 @@ This method was used as a free, but more labor inensive alternative to Apple's p
 
 In operating systems pre-Catalina, iTunes allowed 3rd party applications to have access to an updated XML file at all times. This support ended with MacOS Catalina. As a result, the XML file must be generated manually. 
 
-Dependencies: 
-	Python
-	MySQL
-	xml.etree.ElementTree
-	mysql.connector
-	numpy
+Dependencies:\ 
+	Python\
+	MySQL\
+	xml.etree.ElementTree\
+	mysql.connector\
+	numpy\
 	matplotlib
 
 To start, run library.sql in the SQL directory. This will create a database. Change the login credentials in the SQLConnector init method to your own. You may need to grant your user access to the database. 
 
-Then Go to iTunes/Apple Music, select File > Library > Export Library
-	- save into a directory called lib_backups in the project folder. 
-	- if you want to use the load all feature for multiple XML files, you must name the files 1.xml, 2.xml... in the order in which they were exported from Apple music. 
+Then Go to iTunes/Apple Music, select File > Library > Export Library\
+	- save into a directory called lib_backups in the project folder.\ 
+	- if you want to use the load all feature for multiple XML files, you must name the files 1.xml, 2.xml... in the order in which they\ were exported from Apple music.
 
 Now run main.py and load your library into the database using the 'u' command. 
 
 entering 'h' will print a list of commands. 
+
