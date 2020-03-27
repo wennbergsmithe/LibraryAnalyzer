@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from os import path
+from globals import db
 
 
 # Updates database from a pre-exported file in the lib_backups directory. 
@@ -51,7 +52,6 @@ def updateDBFromXML(arg):
 # command: lg
 def LibGrowthChart():
 	print("Gathering data... ")
-	db = DBConnector()
 	y = []
 	x = []
 	i = 0
@@ -66,16 +66,14 @@ def LibGrowthChart():
 	plt.plot(x,y)
 	plt.gcf().autofmt_xdate() 
 	plt.show()
-	db.disconnect()
-
 
 #chart of overall listening history
 #command: lc
 def listenChart():
-	db = DBConnector()
 	y = []
 	x = []
 	print("Gathering data...")
+	global db 
 	db.query("SELECT COUNT(record_id) AS count, DATE(listen_date) AS date FROM listening_history GROUP BY date ORDER BY date;")
 
 	for date in db.rs:
@@ -87,16 +85,12 @@ def listenChart():
 	plt.gcf().autofmt_xdate() 
 	plt.show()
 
-	db.disconnect()
-
 # Top artists by number of songs from them. 
 # optional x argument specifies how long the list is, default is 10
 # command: tas <optional leng>
 def TopXArtistsBySongs(leng=10):
-	db = DBConnector()
 	db.query("SELECT COUNT(id) AS cnt, artist FROM library GROUP BY artist ORDER BY cnt DESC LIMIT " + str(leng) + ";")
 	ret = db.rs
-	db.disconnect()
 
 	i = 0
 	for song in ret:
@@ -119,10 +113,8 @@ def SongSkipProbability(x, asc=1, zeros_ones=0):
 	else:
 		ordr = "DESC"
 
-	db = DBConnector()
 	db.query("SELECT skip_count/(skip_count+play_count) AS p, name, artist, skip_count as skips, play_count as listens FROM library ORDER BY p " + ordr +";")
 	ret = db.rs
-	db.disconnect()
 	i = 0
 	for song in ret:
 		if(song["p"] != None):#and
@@ -149,10 +141,8 @@ def GenreSkipProbability(x, asc=1, zeros_ones=0):
 	else:
 		ordr = "DESC"
 
-	db = DBConnector()
 	db.query("SELECT SUM(skip_count)/(SUM(skip_count)+SUM(play_count)) AS p, genre, SUM(skip_count) as skips, SUM(play_count) as listens FROM library GROUP BY genre ORDER BY p " + ordr +";")
 	ret = db.rs
-	db.disconnect()
 	i = 0
 	for song in ret:
 		if(song["p"] != None):#and
@@ -178,10 +168,8 @@ def ArtistSkipProbability(x, asc=1, zeros_ones=0):
 	else:
 		ordr = "DESC"
 
-	db = DBConnector()
 	db.query("SELECT SUM(skip_count)/(SUM(skip_count)+SUM(play_count)) AS p, artist, SUM(skip_count) as skips, SUM(play_count) as listens FROM library GROUP BY artist ORDER BY p " + ordr +";")
 	ret = db.rs
-	db.disconnect()
 	i = 0
 	for song in ret:
 		if(song["p"] != None):#and
@@ -199,10 +187,8 @@ def ArtistSkipProbability(x, asc=1, zeros_ones=0):
 def NumSongsByYear(x=10):
 	# prints top x years based on number of songs
 	# command sby <x = length>
-	db = DBConnector()
 	db.query("SELECT COUNT(id) AS sm, year FROM library GROUP BY year ORDER BY sm DESC LIMIT " + str(x) + ";")
 	ret = db.rs
-	db.disconnect()
 
 
 	i = 0
@@ -217,10 +203,8 @@ def MonthsBySongsAdded():
 	# produces a chart of total songs added for each month of the year
 	# command: monchart
 
-	db = DBConnector()
 	db.query("SELECT count(id) AS cnt, MONTH(date_added) AS month FROM library GROUP BY MONTH(date_added) ORDER BY month ASC ;")
 	ret = db.rs
-	db.disconnect()
 	x = []
 	y = []
 	i = 0
@@ -236,10 +220,8 @@ def MonthsBySongsAdded():
 def TopXGenresBySongs(x=10):
 	#top x genres by the number of songs in that genre
 	# command: gbs <x - optional list len>
-	db = DBConnector()
 	db.query("SELECT COUNT(id) AS cnt, genre FROM library GROUP BY genre ORDER BY cnt DESC LIMIT " + str(x) + ";")
 	ret = db.rs
-	db.disconnect()
 
 	i = 0
 	for song in ret:
@@ -255,10 +237,8 @@ def TopXSongsByPlays(x=10):
 	if(x<1):
 		return
 
-	db = DBConnector()
 	db.query("SELECT * FROM library ORDER BY play_count DESC LIMIT " + str(x) + ";")
 	ret = db.rs
-	db.disconnect()
 
 	i = 0
 	for song in ret:

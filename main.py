@@ -6,10 +6,28 @@
 
 import AnalysisLib as lib
 import PlaylistLib as plib
+from SQLConnector import DBConnector
+from globals import db
+
+
 
 def main():
 	done = False
 	print("Welcome to Library Anylizer")
+	db_name = input("Enter the database name: ")
+	if(db.execute("USE " + db_name + ";") == -1):
+		make = "z"
+		while(make != "y" and make != "n"):
+			make = input("This database does not exist. Would you like to create it? (y)es or (n)o: ")
+			if(make == "y"):
+				db.newDB(db_name)
+				break
+			elif(make == "n"):
+				done = True
+				print("bye felicia")
+				break
+			else:
+				print("enter y or n.")
 
 	while(not done):
 
@@ -30,11 +48,13 @@ def main():
 			print("      q - quit")
 
 		
-		elif(u_input == "lg"):
+		elif(u_input == "lg"): #lib growth chart
 			lib.LibGrowthChart()
-		elif(u_input == "lc"):
+
+		elif(u_input == "lc"): #listen chart over time
 			lib.listenChart()
-		elif(u_input[:3] == "tas"):
+
+		elif(u_input[:3] == "tas"): 
 			if(len(u_input) > 3):
 				if(u_input.find(" ") == -1):
 					print("your command is whack")
@@ -51,10 +71,6 @@ def main():
 							print("invalid list length")
 			else:
 				lib.TopXArtistsBySongs()
-
-
-
-
 
 		elif(u_input[:5] == "sprob"):
 			if(len(u_input) > 5):
@@ -220,9 +236,30 @@ def main():
 					print(arg)
 					lib.updateDBFromXML(arg)
 			else:
-				i = input("Enter xml file: ")
+				i = input("Enter xml file or q to quit: ")
 				if(i != 'q'):
-					lib.updateDBFromXML(file)
+					lib.updateDBFromXML(i)
+
+
+
+		elif(u_input[:5] == "newdb"):
+			if(len(u_input) > 5):
+				if(u_input.find(" ") == -1):
+					print("your command is whack")
+					continue
+				else:	
+					arg = u_input[u_input.find(" ") + 1:]
+					print(arg)
+					db.newDB(arg)
+			else:
+				i = input("Enter new database name or q to quit: ")
+				if(i != 'q'):
+					db.newDB(i)
+
+		elif(u_input == "e"):
+			ui = input("Enter SQL command or q to quit. (no queries, commands only): ")
+			if(ui!= "q"):
+				db.execute(ui)
 
 		elif(u_input == "q"):
 			done = True
@@ -233,10 +270,9 @@ def main():
 
 	print("Good Bye!")
 
-
+# db = DBConnector()
 main()
-
-
+db.disconnect()
 
 
 

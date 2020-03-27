@@ -13,7 +13,6 @@ class DBConnector():
 	def __init__(self):
 		#establishes connection to the music data database
 		self.connection = mysql.connector.connect(host='localhost',
-									 database='MusicData',
 									 user='eli',
 									 password='pass', #secure
 									 auth_plugin='mysql_native_password')
@@ -28,7 +27,6 @@ class DBConnector():
 			raise ValueError
 
 
-
 	def execute(self,statement):
 		try:
 			# print(query)
@@ -36,9 +34,12 @@ class DBConnector():
 		except mysql.connector.Error as err:
 			print("SQL Error: {}".format(err))
 			print("\t"+statement)
+			return -1
 		finally:
 			self.connection.commit()
 
+	def changeDB(self, dbName):
+		self.execute("USE "+ dbName + ";")
 
 
 	def query(self,query):
@@ -52,6 +53,25 @@ class DBConnector():
 		except mysql.connector.Error as err:
 			print("SQL Error: {}".format(err))
 			print("\t"+query)
+			return -1
+
+
+	def executeFile(self, filename):
+		fd = open(filename, 'r')
+		sqlFile = fd.read()
+		fd.close()
+		sqlCommands = sqlFile.split(';')
+		for command in sqlCommands:
+			self.execute(command)
+	
+	def newDB(self, db_name):
+		if(self.execute("CREATE DATABASE " + db_name) != -1):
+			self.execute("USE " + db_name)
+			self.executeFile("SQL/library.sql")
+		else:
+			print("Database not created.")
+			return -1
+
 
 
 

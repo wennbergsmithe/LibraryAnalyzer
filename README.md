@@ -10,7 +10,7 @@ Dependencies:<br>
 	Python<br>
 	MySQL<br>
 	xml.etree.ElementTree<br>
-	mysql.connector<br>
+	mysql-connector-python<br>
 	numpy<br>
 	matplotlib
 

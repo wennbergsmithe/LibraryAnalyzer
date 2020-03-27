@@ -9,39 +9,37 @@ import xml.etree.ElementTree as ElementTree
 from Track import Track
 from SQLConnector import DBConnector
 import progressbar
+from globals import db
 
 class iTunesParser:
-	'''Class for parsing an iTunes Library'''
+	#parses xml file from iTunes 
 
-	def __init__(self, input_file):
-		'''Constructor'''
-		self.source = input_file #Source file
-		self.xml = ElementTree.parse(input_file) # Parsed XML File in a tree
+	def __init__(self, file):
+
+		self.source = file #Source file
+		self.xml = ElementTree.parse(file) # Parsed XML File
 		self.library = list() #List containing all the tracks
 
 
 	def parse(self):
-		'''Parse the file'''
-		# Documentation about Element Tree ->  http://docs.python.org/2/library/xml.etree.elementtree.html
+		# parse the xml file
 		root = self.xml.getroot()
 		
 		#Find index of element containing tracks
 		i = 0
 		
-		for child in root[0]:
-			if child.text == "Tracks":
-				tracksIndex = i+1
+		for sub in root[0]:
+			if sub.text == "Tracks":
+				trIndex = i+1
 				break
 			i += 1
 		
 				
 		#Loop trough all songs
 		i = 0
-		for song in root[0][tracksIndex]:
+		for song in root[0][trIndex]:
 			#Every second element is a track
 			if i % 2 == 1:
-				
-				
 				#Loop through metadata of the track and extract info
 				j = 0
 				name = ""
@@ -102,31 +100,18 @@ class iTunesParser:
 						rel_date = song[j+1].text
 					elif tag.text == "Skip Count":
 						skip_count = song[j+1].text
-					
-
-					
 					j += 1
 				
 				if(create):
 					track = Track(name, artist, album, alb_artist, comp, genre,kind,size,total_time, track_num, track_count, year, date_add, play_count, play_date, rel_date,skip_count)
 					self.library.append(track)
-
-			
-			i += 1			
-			
-		
+			i += 1
 		return
 
 	def LibToDB(self):
 
-		bar = progressbar.ProgressBar(maxval=len(self.library), \
-		    widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+		bar = progressbar.ProgressBar(maxval=len(self.library),widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
 		bar.start()
-		
-		
-		
-		dbc = DBConnector()
-
 		i = 0
 		for track in self.library:
 			i+=1
@@ -137,9 +122,9 @@ class iTunesParser:
 			stmt += "' AND artist = '" + track.artist.replace("'","''") 
 			stmt += "' AND album = '" + track.album.replace("'","''") 
 			stmt += "' AND track_num = " + str(track.track_num) + ";"
-			dbc.query(stmt)
+			db.query(stmt)
 
-			if(dbc.rs == []):
+			if(db.rs == []):
 
 				# print(track.name.replace("'","''"),"",track.artist.replace("'","''"),"",track.album.replace("'","''"))
 
@@ -155,17 +140,17 @@ class iTunesParser:
 				stmt += str(track.track_num) + ", " + str(track.track_count) + ", " + str(track.year)+ ", DATE_ADD('" +  str(track.date_add)+ "', INTERVAL -4 DAY), "
 				stmt += str(track.play_count)+ ", DATE_ADD('" +  str(track.play_date)+ "', INTERVAL -4 DAY), DATE_ADD('" +  str(track.rel_date) + "', INTERVAL -4 DAY), " + str(track.skip_count) + ");"
 				# print("OG INSERRRTTTT",stmt)
-				dbc.execute(stmt)
+				db.execute(stmt)
 
 			else:
 				# This song already exists in library so update play count, total time, and play date
 				# also update play history table
 
-				track_id = dbc.rs[0]['id']			#track id
-				db_pc = dbc.rs[0]['play_count']		#current listen count
+				track_id = db.rs[0]['id']			#track id
+				db_pc = db.rs[0]['play_count']		#current listen count
 				if(db_pc == None):
 					db_pc = 0
-				db_sc = dbc.rs[0]['skip_count']		#current skip count
+				db_sc = db.rs[0]['skip_count']		#current skip count
 				if(db_sc == None):
 					db_sc = 0
 
@@ -175,13 +160,13 @@ class iTunesParser:
 									
 					if (track.play_count > db_pc ):
 						q = "SELECT record_id FROM listening_history WHERE track_id = " + str(track_id) + " AND listen_date = '" + str(track.play_date) + "';"
-						dbc.query(q)
-						if(dbc.rs == []):
+						db.query(q)
+						if(db.rs == []):
 							stmt = "INSERT INTO listening_history (track_id, listen_date, listen_count)"
 							stmt += "    VALUES (" + str(track_id) + ","
 							stmt += "           DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY),"
 							stmt += "            1);"
-							dbc.execute(stmt)
+							db.execute(stmt)
 
 					stmt = "UPDATE library "
 					stmt += "  SET play_count = " + str(track.play_count) + ", "
@@ -189,10 +174,9 @@ class iTunesParser:
 					stmt += "      play_date = DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY), "
 					stmt += "      skip_count = " + str(track.skip_count) + " "
 					stmt += "WHERE id = " + str(track_id) + ";"
-					dbc.execute(stmt)
+					db.execute(stmt)
 					
 		bar.finish()
-		dbc.disconnect()
 
 
 

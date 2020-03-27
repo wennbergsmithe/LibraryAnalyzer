@@ -5,12 +5,12 @@
 from ItunesParser import iTunesParser
 from SQLConnector import DBConnector
 import re
+from globals import db
 
 def PlayListUnheard(x=50, genre="recent", since=1900):
 	# generates a playlist of songs that have not been heard before. 
 	# pass x for list len, genre to specify genre(x most recent are used as default), and min year released for playlist.
 	# prints artist and song
-	dbc = DBConnector()
 	db2 = DBConnector()
 	i = 0
 	if(genre.lower() == "rap"): genre += " hip hop "
@@ -20,9 +20,9 @@ def PlayListUnheard(x=50, genre="recent", since=1900):
 		q = "SELECT genre FROM library ORDER BY play_date DESC LIMIT " + str(x) + ";" 
 		
 
-		dbc.query(q)
+		db.query(q)
 				
-		for row in dbc.rs:
+		for row in db.rs:
 			gen = row["genre"]
 
 			q2 = "SELECT SUBSTRING(name,1,50) as name, SUBSTRING(artist,1,50) as artist FROM library WHERE genre LIKE '" + gen + "' AND play_count = 0 AND YEAR(rel_date) >= " + str(since) + " ORDER BY RAND() LIMIT 1;"
@@ -57,8 +57,6 @@ def PlayListUnheard(x=50, genre="recent", since=1900):
 			print("\tArtist: " + artist)
 			print("\tGenre:" + genre)
 
-
-	dbc.disconnect()
 	db2.disconnect()
 
 
