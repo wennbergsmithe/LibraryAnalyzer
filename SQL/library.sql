@@ -18,13 +18,10 @@ CREATE TABLE library (
 	skip_count INTEGER DEFAULT 0,
 	date_added DATETIME DEFAULT NULL
 );
-
 CREATE INDEX idx ON library (artist);
-
 CREATE TABLE listening_history (
 	record_id integer NOT NULL auto_increment primary key,
 	track_id integer NOT NULL,
 	listen_date DATETIME NOT NULL,
 	listen_count INTEGER DEFAULT 0
 );
- 

@@ -7,45 +7,56 @@
 import AnalysisLib as lib
 import PlaylistLib as plib
 from SQLConnector import DBConnector
+import mysql.connector
 from globals import db
 
-
+db_name = ""
 
 def main():
-	done = False
+	done1 = False
+	done2 = False
 	print("Welcome to Library Anylizer")
-	db_name = input("Enter the database name: ")
-	if(db.execute("USE " + db_name + ";") == -1):
-		make = "z"
-		while(make != "y" and make != "n"):
-			make = input("This database does not exist. Would you like to create it? (y)es or (n)o: ")
-			if(make == "y"):
-				db.newDB(db_name)
-				break
-			elif(make == "n"):
-				done = True
-				print("bye felicia")
-				break
-			else:
-				print("enter y or n.")
 
-	while(not done):
+	while(not done1):
+		db_name = input("Enter the database name or q to quit: ")
+		if(db_name == "q"):
+			done1 = True
+			done2 = True
+		else:	
+			try:
+				db.cursor.execute("USE " + db_name + ";")
+
+			except mysql.connector.Error as err:
+				make = "z"
+				while(make != "y" and make != "n"):
+					make = input("This database does not exist. Would you like to create it? (y)es or (n)o: ")
+					if(make == "y"):
+						db.newDB(db_name)
+						break
+					elif(make == "n"):
+						continue
+					else:
+						print("enter y or n.")
+			else:
+				done1 = True
+
+	while(not done2):
 
 		u_input = input("Please enter Command: ").lower()
 		if(u_input == "h"):
-			print("      u - Update database from a specified XML file within the lib_backups/ directory.")
-			print("     lg - Library growth chart over time")
-			print("     lc - Listen chart over time")
-			print("    tas - Top 10 artists by song count, pass integer to change list length.")
-			print("  sprob - songs ranked by skip probability.")
-			print("  gprob - genres ranked by skip probability.")
-			print("  aprob - artists ranked by skip probability.")
-			print("    sby - top 10 songs by plays, pass integer to change list length.")
+			print("u ------- Update database from a specified XML file within the lib_backups/ directory.")
+			print("lg ------ Library growth chart over time")
+			print("lc ------ Listen chart over time")
+			print("tas ----- Top 10 artists by song count, pass integer to change list length.")
+			print("sprob --- songs ranked by skip probability.")
+			print("gprob --- genres ranked by skip probability.")
+			print("aprob --- artists ranked by skip probability.")
+			print("sby ----- top 10 songs by plays, pass integer to change list length.")
 			print("monchar - chart of total number of songs by month")
-			print("    gbs - top ten genres by number of songs, pass int to change list length.")
-			print("    sbp - top ten songs by number of plays, pass int to change list length.")
-			print("  uplay - generates a playlist of unheard songs - optional pass genre and year")
-			print("      q - quit")
+			print("gbs ----- top ten genres by number of songs, pass int to change list length.")
+			print("sbp ----- top ten songs by number of plays, pass int to change list length.")
+			print("uplay --- generates a playlist of unheard songs - optional pass genre and year")
+			print("q ------- quit")
 
 		
 		elif(u_input == "lg"): #lib growth chart
@@ -216,15 +227,15 @@ def main():
 					else:
 						if(x > 0):
 							if (len(args) == 3):
-								plib.PlayListUnheard(x=x,genre=args[2])
+								plib.PlayListUnheard(db_name, x=x,genre=args[2])
 							elif(len(args) == 4):
-								plib.PlayListUnheard(x=x, genre=args[2],since=int(args[3]))
+								plib.PlayListUnheard(db_name,x=x, genre=args[2],since=int(args[3]))
 							else:
-								plib.PlayListUnheard(x=x)
+								plib.PlayListUnheard(db_name,x=x)
 						else:
 							print("invalid list length")
 			else:
-				plib.PlayListUnheard(10)
+				plib.PlayListUnheard(db_name, x=10)
 
 		elif(u_input[0] == "u"):
 			if(len(u_input) > 1):
@@ -262,7 +273,7 @@ def main():
 				db.execute(ui)
 
 		elif(u_input == "q"):
-			done = True
+			done2 = True
 		else:
 			print("Invalid command. enter " + '"' + 'h' + '"' + " for a list of commands.")
 

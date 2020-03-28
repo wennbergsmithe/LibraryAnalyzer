@@ -7,11 +7,14 @@ from SQLConnector import DBConnector
 import re
 from globals import db
 
-def PlayListUnheard(x=50, genre="recent", since=1900):
+def PlayListUnheard(db_name, x=50, genre="recent", since=1900):
 	# generates a playlist of songs that have not been heard before. 
 	# pass x for list len, genre to specify genre(x most recent are used as default), and min year released for playlist.
 	# prints artist and song
 	db2 = DBConnector()
+	if(db2.execute("USE "+ db_name  + ";") == -1):
+		return -1
+
 	i = 0
 	if(genre.lower() == "rap"): genre += " hip hop "
 
