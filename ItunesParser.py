@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ElementTree
 from Track import Track
 from SQLConnector import DBConnector
 import progressbar
+import re
 from globals import db
 
 class iTunesParser:
@@ -75,9 +76,25 @@ class iTunesParser:
 					elif tag.text == "Album":
 						album = song[j+1].text
 					elif tag.text == "Genre":
+						# agrigate viariations of same genre
 						genre = song[j+1].text
-						if (genre == "Audiobook" or genre == "Podcast"):
+						if(genre == "Hip Hop/Rap" or genre == "Hip-Hop" or genre == "Hip Hop" or genre == "Rap"):
+							genre = "Hip-Hop/Rap"
+						elif(genre == "Africa"):
+							genre = "African"
+						elif(genre == "Blues-Rock" or genre == "Blues Rock"):
+							genre = "Blues/Rock"
+						elif(genre == "Popular"):
+							genre = "Pop"
+						elif(genre == "R&B Soul"):
+							genre = "R&B/Soul"
+						elif(genre == "Classic Rock" or genre == "Rock & Roll" or genre == "Rock/Pop" or genre == "General Rock"):
+							genre = "Rock"
+						elif (genre == "Audiobook" or genre == "Podcast"): # ignore audiobooks and podcasts
 							create = False
+						elif(genre == " " or genre == ""):
+							genre = "No Genre"
+
 					elif tag.text == "Kind":
 						kind = song[j+1].text
 					elif tag.text == "Size":
@@ -116,21 +133,16 @@ class iTunesParser:
 		for track in self.library:
 			i+=1
 			bar.update(i)
-			stmt = "SELECT id, play_count, skip_count "
-			stmt += " FROM library "
+			stmt = "SELECT id, play_count, skip_count "						# first check if the song exists in
+			stmt += " FROM library "										# the library already. 
 			stmt += "WHERE name = '" + track.name.replace("'","''")
 			stmt += "' AND artist = '" + track.artist.replace("'","''") 
 			stmt += "' AND album = '" + track.album.replace("'","''") 
 			stmt += "' AND track_num = " + str(track.track_num) + ";"
 			db.query(stmt)
 
-			if(db.rs == []):
-
-				# print(track.name.replace("'","''"),"",track.artist.replace("'","''"),"",track.album.replace("'","''"))
-
-				# This song does not exist in library so insert
-
-				stmt = " INSERT INTO library "
+			if(db.rs == []):												# if the record does not exist,
+				stmt = " INSERT INTO library "								# insert it into the library table
 				stmt += "             (name, artist, album, album_artist, "
 				stmt += "             comp, genre, kind, total_time, track_num,"
 				stmt += "             track_count, year, date_added, play_count, "
@@ -139,36 +151,33 @@ class iTunesParser:
 				stmt +=  track.comp.replace("'","''") + "', '" +  track.genre.replace("'","''") + "', '" +  track.kind.replace("'","''") + "', " +  str(track.total_time) + ", "
 				stmt += str(track.track_num) + ", " + str(track.track_count) + ", " + str(track.year)+ ", DATE_ADD('" +  str(track.date_add)+ "', INTERVAL -4 DAY), "
 				stmt += str(track.play_count)+ ", DATE_ADD('" +  str(track.play_date)+ "', INTERVAL -4 DAY), DATE_ADD('" +  str(track.rel_date) + "', INTERVAL -4 DAY), " + str(track.skip_count) + ");"
-				# print("OG INSERRRTTTT",stmt)
 				db.execute(stmt)
 
-			else:
-				# This song already exists in library so update play count, total time, and play date
-				# also update play history table
+			else:											# the record does exist
 
-				track_id = db.rs[0]['id']			#track id
-				db_pc = db.rs[0]['play_count']		#current listen count
+				track_id = db.rs[0]['id']					# track id
+				db_pc = db.rs[0]['play_count']				# current listen count
 				if(db_pc == None):
 					db_pc = 0
-				db_sc = db.rs[0]['skip_count']		#current skip count
+				db_sc = db.rs[0]['skip_count']				# current skip count
 				if(db_sc == None):
 					db_sc = 0
 
 
 				
-				if (track.play_count > db_pc or track.skip_count > db_sc):	#if there are new plays	or skips
+				if (track.play_count > db_pc or track.skip_count > db_sc):	# if there are new plays or skips
 									
-					if (track.play_count > db_pc ):
+					if (track.play_count > db_pc ):							# for new plays only:
 						q = "SELECT record_id FROM listening_history WHERE track_id = " + str(track_id) + " AND listen_date = '" + str(track.play_date) + "';"
 						db.query(q)
-						if(db.rs == []):
+						if(db.rs == []):									# new listen record in listening history
 							stmt = "INSERT INTO listening_history (track_id, listen_date, listen_count)"
 							stmt += "    VALUES (" + str(track_id) + ","
 							stmt += "           DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY),"
 							stmt += "            1);"
 							db.execute(stmt)
-
-					stmt = "UPDATE library "
+																			# for new plays and new skips:
+					stmt = "UPDATE library "								# update data in library
 					stmt += "  SET play_count = " + str(track.play_count) + ", "
 					stmt += "      total_time = " + str(track.total_time) + ", "
 					stmt += "      play_date = DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY), "

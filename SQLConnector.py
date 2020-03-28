@@ -72,6 +72,9 @@ class DBConnector():
 			print("Database not created.")
 			return -1
 
+	def getDB(self):
+		self.query("SELECT DATABASE();")
+		return self.rs[0]['DATABASE()']
 
 
 
@@ -79,4 +82,3 @@ class DBConnector():
 		self.cursor.close()
 		self.connection.close()
 		print("Closed connection to " + self.db_Info)
-

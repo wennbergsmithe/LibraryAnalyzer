@@ -22,7 +22,6 @@ def PlayListUnheard(db_name, x=50, genre="recent", since=1900):
 		
 		q = "SELECT genre FROM library ORDER BY play_date DESC LIMIT " + str(x) + ";" 
 		
-
 		db.query(q)
 				
 		for row in db.rs:

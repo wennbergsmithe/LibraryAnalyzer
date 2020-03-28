@@ -32,6 +32,7 @@ def main():
 					make = input("This database does not exist. Would you like to create it? (y)es or (n)o: ")
 					if(make == "y"):
 						db.newDB(db_name)
+						done1 = True
 						break
 					elif(make == "n"):
 						continue
@@ -42,21 +43,33 @@ def main():
 
 	while(not done2):
 
-		u_input = input("Please enter Command: ").lower()
+		u_input = input("Please enter Command or h for a list of commands: ").lower()
 		if(u_input == "h"):
-			print("u ------- Update database from a specified XML file within the lib_backups/ directory.")
-			print("lg ------ Library growth chart over time")
-			print("lc ------ Listen chart over time")
-			print("tas ----- Top 10 artists by song count, pass integer to change list length.")
-			print("sprob --- songs ranked by skip probability.")
-			print("gprob --- genres ranked by skip probability.")
-			print("aprob --- artists ranked by skip probability.")
-			print("sby ----- top 10 songs by plays, pass integer to change list length.")
-			print("monchar - chart of total number of songs by month")
-			print("gbs ----- top ten genres by number of songs, pass int to change list length.")
-			print("sbp ----- top ten songs by number of plays, pass int to change list length.")
-			print("uplay --- generates a playlist of unheard songs - optional pass genre and year")
-			print("q ------- quit")
+			print()
+			print("Database commands:")
+			print("  u ------- Update database from a specified XML file within the lib_backups/ directory.")
+			print("  e ------- Execute database command (no queries).")
+			print()
+			print("Charts:")
+			print("  lg ------ Library growth chart over time.")
+			print("  lc ------ Listen chart over time.")
+			print("  monchar - Chart of total number of songs by month.")
+			print()
+			print("Lists:")
+			print("  tas ----- Top 10 artists by song count, pass integer to change list length.")
+			print("  sprob --- Songs ranked by skip probability.")
+			print("  gprob --- Genres ranked by skip probability.")
+			print("  aprob --- Artists ranked by skip probability.")
+			print("  sby ----- Top 10 songs by plays, pass integer to change list length.")
+			print("  gbs ----- Top ten genres by number of songs, pass int to change list length.")
+			print("  sbp ----- Top ten songs by number of plays, pass int to change list length.")
+			print()
+			print("Playlists:")
+			print("  uplay --- Generates a playlist of unheard songs - optional pass genre and year")
+			print()
+			print("Program:")
+			print("  q ------- Quit")
+			print()
 
 		
 		elif(u_input == "lg"): #lib growth chart
@@ -281,7 +294,7 @@ def main():
 
 	print("Good Bye!")
 
-# db = DBConnector()
+# # db = DBConnector()
 main()
 db.disconnect()
 

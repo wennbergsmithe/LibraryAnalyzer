@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from os import path
 from globals import db
-
+import altair as alt
+import pandas as pd
 
 # Updates database from a pre-exported file in the lib_backups directory. 
 # Itunes no longer automatically update the xml file, so it must be exported manually through itunes app. 
@@ -41,12 +42,42 @@ def updateDBFromXML(arg):
 				parser = iTunesParser(fp)
 				print("Parsing " + fp)
 				parser.parse()
-				print("Parsing complete, data moved to database.")
+				print("Parsing complete, exporting library to database...")
 				parser.LibToDB()
 			else:
 				more = False
 			i += 1
 		        
+def GenreStreamGraph():
+	#incomplete
+
+	db.query("SELECT DISTINCT(YEAR(date_added)) yr FROM library ORDER BY yr;")
+	years = []
+	for r in db.rs:
+		years.append(r['yr'])
+	db.query("SELECT DISTINCT(genre) g FROM library ORDER BY g;")
+	genres = []
+
+	x = []
+	x.append("year")
+	for r in db.rs:
+		genres.append(r['g'])
+		x.append(r['g'])
+	y = []
+	for yr in years:
+		ty = []
+		ty.append(yr)
+		i = 0
+		for g in genres:
+			db.query("SELECT COUNT(id) AS c FROM library WHERE YEAR(date_added) = " + str(yr) + " AND genre = '" + g + "';")
+			for r in db.rs:
+				ty.append(r['c'])
+		y.append(ty)
+
+
+	# print(x)
+	df = pd.DataFrame([y], index=x)
+	print(df)
 
 # overall library growth over time
 # command: lg
@@ -248,6 +279,8 @@ def TopXSongsByPlays(x=10):
 		print("Artist: " + song["artist"])
 		print("Play Count: " + str(song['play_count']))
 		print()
-
+# db.execute("USE musicdata")
+# GenreStreamGraph()
+# db.disconnect()
 
 
