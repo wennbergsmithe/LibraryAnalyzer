@@ -153,7 +153,7 @@ class iTunesParser:
 				stmt += str(track.play_count)+ ", DATE_ADD('" +  str(track.play_date)+ "', INTERVAL -4 DAY), DATE_ADD('" +  str(track.rel_date) + "', INTERVAL -4 DAY), " + str(track.skip_count) + ");"
 				db.execute(stmt)
 
-			else:											# the record does exist
+			else:											# if the record does exist
 
 				track_id = db.rs[0]['id']					# track id
 				db_pc = db.rs[0]['play_count']				# current listen count

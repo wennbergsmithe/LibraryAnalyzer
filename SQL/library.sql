@@ -20,8 +20,8 @@ CREATE TABLE library (
 );
 CREATE INDEX idx ON library (artist);
 CREATE TABLE listening_history (
-	record_id integer NOT NULL auto_increment primary key,
-	track_id integer NOT NULL,
+	record_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	track_id INTEGER NOT NULL,
 	listen_date DATETIME NOT NULL,
 	listen_count INTEGER DEFAULT 0
 );

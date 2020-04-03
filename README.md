@@ -14,13 +14,13 @@ In operating systems pre-Catalina, iTunes allowed 3rd party applications to have
 * numpy<br>
 * matplotlib
 
-To start, run library.sql in the SQL directory. This will create a database. Change the login credentials in the SQLConnector init method to your own. You may need to grant your user access to the database. 
+To start, change the login credentials in the SQLConnector init method to your own. 
 
 Then Go to iTunes/Apple Music, select File > Library > Export Library<br>
 * save into a directory called lib_backups in the project folder.<br>
 * if you want to use the load all feature for multiple XML files, you must name the files 1.xml, 2.xml... in the order in which they were exported from Apple music.
 
-Now run main.py and load your library into the database using the 'u' command. 
+Now run main.py, give it a database name and load your library into the database using the 'u' command. 
 
 entering 'h' will print a list of commands. 
 

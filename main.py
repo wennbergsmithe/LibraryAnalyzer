@@ -186,7 +186,7 @@ def main():
 								print("invalid list length")
 			else:
 				lib.NumSongsByYear()
-		elif(u_input == "monchart"):
+		elif(u_input == "monchar"):
 			lib.MonthsBySongsAdded()
 		elif(u_input[:3] == "gbs"): 
 			if(len(u_input) > 3):
