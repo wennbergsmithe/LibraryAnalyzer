@@ -13,12 +13,12 @@ CREATE TABLE library (
 	year INTEGER DEFAULT 0,
 	play_date DATETIME DEFAULT '1900-01-01',
 	date_mod DATETIME DEFAULT '1900-01-01',
-	play_count INTEGER DEFAULT NULL,
+	play_count INTEGER DEFAULT 0,
 	rel_date DATETIME DEFAULT '1900-01-01',
 	skip_count INTEGER DEFAULT 0,
 	date_added DATETIME DEFAULT '1900-01-01'
 );
-CREATE INDEX idx ON library (artist);
+CREATE INDEX atst ON library (artist);
 CREATE TABLE listening_history (
 	record_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	track_id INTEGER NOT NULL,
