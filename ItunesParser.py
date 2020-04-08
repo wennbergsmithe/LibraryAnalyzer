@@ -152,6 +152,16 @@ class iTunesParser:
 				stmt += str(track.track_num) + ", " + str(track.track_count) + ", " + str(track.year)+ ", DATE_ADD('" +  str(track.date_add)+ "', INTERVAL -4 DAY), "
 				stmt += str(track.play_count)+ ", DATE_ADD('" +  str(track.play_date)+ "', INTERVAL -4 DAY), DATE_ADD('" +  str(track.rel_date) + "', INTERVAL -4 DAY), " + str(track.skip_count) + ");"
 				db.execute(stmt)
+				last_id = db.cursor.lastrowid
+
+				if(track.play_count > 0):											# if there are plays, insert last play into listening history
+					
+					if(int(track.play_date[:4]) > 2000):
+						stmt = "INSERT INTO listening_history (track_id, listen_date, listen_count)"
+						stmt += "    VALUES (" + str(last_id) + ","
+						stmt += "           DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY),"
+						stmt += "            1);"
+						db.execute(stmt)
 
 			else:											# if the record does exist
 
