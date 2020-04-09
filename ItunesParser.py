@@ -11,6 +11,8 @@ from SQLConnector import DBConnector
 import progressbar
 import re
 from globals import db
+import squarify
+import matplotlib.pyplot as plt
 
 class iTunesParser:
 	#parses xml file from iTunes 
@@ -196,8 +198,6 @@ class iTunesParser:
 					db.execute(stmt)
 					
 		bar.finish()
-
-
 
 
 

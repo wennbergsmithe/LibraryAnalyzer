@@ -6,7 +6,9 @@ from Track import Track
 from ItunesParser import iTunesParser
 from SQLConnector import DBConnector
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+import squarify
 from matplotlib.ticker import FuncFormatter
 from os import path
 from globals import db
@@ -78,6 +80,36 @@ def GenreStreamGraph():
 	# print(x)
 	df = pd.DataFrame([y], index=x)
 	print(df)
+
+
+
+def TreeMap():
+
+	db.query("SELECT COUNT(id) as count, SUM(play_count) as pc, genre FROM library GROUP BY genre ORDER BY count DESC LIMIT 20;")
+
+	sizs = []
+	labels = []
+	plays = []
+
+	for genre in db.rs:
+		sizs.append(genre['count'])
+		labels.append(genre['genre'])
+		plays.append(int(genre['pc']))
+
+	# print(plays)
+
+	# create a color palette, mapped to these values
+	cmap = matplotlib.cm.Reds
+	mini=min(plays)
+	maxi=max(plays)
+	norm = matplotlib.colors.Normalize(vmin=mini, vmax=maxi)
+	colors = [cmap(norm(value)) for value in plays]
+	 
+	# Change color
+	squarify.plot(sizes=sizs,label=labels, alpha=.8, color=colors )
+	plt.axis('off')
+	plt.show()
+
 
 # overall library growth over time
 # command: lg
@@ -283,4 +315,5 @@ def TopXSongsByPlays(x=10):
 # GenreStreamGraph()
 # db.disconnect()
 
-
+# db.execute("USE MusicData;")
+# TreeMap()

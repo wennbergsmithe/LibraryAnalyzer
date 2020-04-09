@@ -13,6 +13,8 @@ In operating systems pre-Catalina, iTunes allowed 3rd party applications to have
 * mysql-connector-python<br>
 * numpy<br>
 * matplotlib
+* squarify
+
 
 To start, change the login credentials in the SQLConnector init method to your own. 
 
