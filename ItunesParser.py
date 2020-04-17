@@ -23,7 +23,6 @@ class iTunesParser:
 		self.xml = ElementTree.parse(file) # Parsed XML File
 		self.library = list() #List containing all the tracks
 
-
 	def parse(self):
 		# parse the xml file
 		root = self.xml.getroot()
@@ -36,8 +35,6 @@ class iTunesParser:
 				trIndex = i+1
 				break
 			i += 1
-		
-				
 		#Loop trough all songs
 		i = 0
 		for song in root[0][trIndex]:
@@ -63,8 +60,6 @@ class iTunesParser:
 				rel_date = 0
 				skip_count = 0
 				create = True
-
-
 
 				for tag in song:
 					if tag.text == "Name":
@@ -128,7 +123,7 @@ class iTunesParser:
 		return
 
 	def LibToDB(self):
-
+		#load the library info into the database, updating if it already exists there
 		bar = progressbar.ProgressBar(maxval=len(self.library),widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
 		bar.start()
 		i = 0
@@ -166,7 +161,6 @@ class iTunesParser:
 						db.execute(stmt)
 
 			else:											# if the record does exist
-
 				track_id = db.rs[0]['id']					# track id
 				db_pc = db.rs[0]['play_count']				# current listen count
 				if(db_pc == None):
@@ -174,8 +168,6 @@ class iTunesParser:
 				db_sc = db.rs[0]['skip_count']				# current skip count
 				if(db_sc == None):
 					db_sc = 0
-
-
 				
 				if (track.play_count > db_pc or track.skip_count > db_sc):	# if there are new plays or skips
 									
@@ -185,7 +177,7 @@ class iTunesParser:
 						if(db.rs == []):									# new listen record in listening history
 							stmt = "INSERT INTO listening_history (track_id, listen_date, listen_count)"
 							stmt += "    VALUES (" + str(track_id) + ","
-							stmt += "           DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY),"
+							stmt += "   DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY),"
 							stmt += "            1);"
 							db.execute(stmt)
 																			# for new plays and new skips:
@@ -198,16 +190,5 @@ class iTunesParser:
 					db.execute(stmt)
 					
 		bar.finish()
-
-
-
-
-
-
-
-
-
-
-
 
 

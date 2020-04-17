@@ -62,18 +62,3 @@ def PlayListUnheard(db_name, x=50, genre="recent", since=1900):
 	db2.disconnect()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

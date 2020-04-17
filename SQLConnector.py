@@ -26,7 +26,6 @@ class DBConnector():
 			print("failed to establish database connection")
 			raise ValueError
 
-
 	def execute(self,statement):
 		try:
 			# print(query)
@@ -40,7 +39,6 @@ class DBConnector():
 
 	def changeDB(self, dbName):
 		self.execute("USE "+ dbName + ";")
-
 
 	def query(self,query):
 		try:

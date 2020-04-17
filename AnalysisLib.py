@@ -49,41 +49,70 @@ def updateDBFromXML(arg):
 			else:
 				more = False
 			i += 1
-		        
-def GenreStreamGraph():
+
+
+
+def GenreStackPlot():
 	#incomplete
-
-	db.query("SELECT DISTINCT(YEAR(date_added)) yr FROM library ORDER BY yr;")
-	years = []
-	for r in db.rs:
-		years.append(r['yr'])
-	db.query("SELECT DISTINCT(genre) g FROM library ORDER BY g;")
 	genres = []
+	years = []
+	counts = []
+	db.query("SELECT COUNT(id) count, genre FROM library GROUP BY genre ORDER BY count DESC LIMIT 10;")
+	
+	for genre in db.rs:
+ 		genres.append(genre['genre'])
 
-	x = []
-	x.append("year")
-	for r in db.rs:
-		genres.append(r['g'])
-		x.append(r['g'])
-	y = []
-	for yr in years:
-		ty = []
-		ty.append(yr)
-		i = 0
-		for g in genres:
-			db.query("SELECT COUNT(id) AS c FROM library WHERE YEAR(date_added) = " + str(yr) + " AND genre = '" + g + "';")
-			for r in db.rs:
-				ty.append(r['c'])
-		y.append(ty)
+	db.query("SELECT DISTINCT(YEAR(date_added)) as yr FROM library ORDER BY yr;")
 
+	for rslt in db.rs:
+		years.append(rslt['yr'])
+	for genre in genres:
+	
+		temp = []
+		for year in years:
+			db.query("SELECT COUNT(id) as count FROM library where genre = '" + genre + "'AND YEAR(date_added) = " + str(year) + ";")
+			
+			for rslt in db.rs:
+				temp.append(rslt['count'])
 
-	# print(x)
-	df = pd.DataFrame([y], index=x)
-	print(df)
+		counts.append(temp)
 
+	y = np.vstack(counts)
+	labels = genres
+	plt.stackplot(years, counts, labels=labels)
+	plt.legend(loc='upper left')
+	plt.show()
 
+	
 
-def TreeMap():
+def ArtistTreeMap():
+
+	db.query("SELECT COUNT(id) as count, SUM(play_count) as pc, artist FROM library GROUP BY artist ORDER BY count DESC LIMIT 20;")
+
+	sizs = []
+	labels = []
+	plays = []
+
+	for genre in db.rs:
+		sizs.append(genre['count'])
+		labels.append(genre['artist'])
+		plays.append(int(genre['pc']))
+
+	# print(plays)
+
+	# create a color palette, mapped to these values
+	cmap = matplotlib.cm.Reds
+	mini=min(plays)
+	maxi=max(plays)
+	norm = matplotlib.colors.Normalize(vmin=mini, vmax=maxi)
+	colors = [cmap(norm(value)) for value in plays]
+	 
+	# Change color
+	squarify.plot(sizes=sizs,label=labels, alpha=.8, color=colors )
+	plt.axis('off')
+	plt.show()
+
+def GenreTreeMap():
 
 	db.query("SELECT COUNT(id) as count, SUM(play_count) as pc, genre FROM library GROUP BY genre ORDER BY count DESC LIMIT 20;")
 
@@ -106,7 +135,7 @@ def TreeMap():
 	colors = [cmap(norm(value)) for value in plays]
 	 
 	# Change color
-	squarify.plot(sizes=sizs,label=labels, alpha=.8, color=colors )
+	squarify.plot(sizes=sizs,label=labels, alpha=.8)#, color=colors )
 	plt.axis('off')
 	plt.show()
 
@@ -129,6 +158,25 @@ def LibGrowthChart():
 	plt.plot(x,y)
 	plt.gcf().autofmt_xdate() 
 	plt.show()
+
+#chart of overall listening history
+#command: lc
+def CoronaListenChart():
+	y = []
+	x = []
+	print("Gathering data...")
+	global db 
+	db.query("SELECT COUNT(record_id) AS count, DATE(listen_date) AS date FROM listening_history WHERE DATE(listen_date) > '2020-02-01' GROUP BY date ORDER BY date;")
+
+	for date in db.rs:
+		x.append(date['date'])
+		y.append(date['count'])
+
+	print("Be sure to close chart window before continuing.")
+	plt.plot(x,y)
+	plt.gcf().autofmt_xdate() 
+	plt.show()
+
 
 #chart of overall listening history
 #command: lc
@@ -294,6 +342,8 @@ def TopXGenresBySongs(x=10):
 		print("Number Of Songs: " + str(song["cnt"]))
 		print()
 
+
+
 def TopXSongsByPlays(x=10):
 	# top x songs by play count
 	# command sbp <optional x list len>
@@ -311,9 +361,11 @@ def TopXSongsByPlays(x=10):
 		print("Artist: " + song["artist"])
 		print("Play Count: " + str(song['play_count']))
 		print()
-# db.execute("USE musicdata")
-# GenreStreamGraph()
-# db.disconnect()
 
-# db.execute("USE MusicData;")
-# TreeMap()
+db.execute("USE musicdata;")
+GenreTreeMap()
+db.disconnect()
+
+
+
+
