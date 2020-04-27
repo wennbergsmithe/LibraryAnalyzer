@@ -16,7 +16,8 @@ CREATE TABLE library (
 	play_count INTEGER DEFAULT 0,
 	rel_date DATETIME DEFAULT '1900-01-01',
 	skip_count INTEGER DEFAULT 0,
-	date_added DATETIME DEFAULT '1900-01-01'
+	date_added DATETIME DEFAULT '1900-01-01',
+	loved BOOLEAN DEFAULT 0
 );
 CREATE INDEX atst ON library (artist);
 CREATE TABLE listening_history (

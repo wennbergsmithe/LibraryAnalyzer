@@ -14,6 +14,8 @@ In operating systems pre-Catalina, iTunes allowed 3rd party applications to have
 * numpy<br>
 * matplotlib
 * squarify
+* pandas
+* altair
 
 
 To start, change the login credentials in the SQLConnector init method to your own. 

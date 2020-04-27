@@ -9,7 +9,7 @@ from datetime import datetime
 
 class Track:
 	def __init__(self, name, artist, album, alb_artist, comp, genre, kind,size,total_time, track_num, 
-				 track_count, year, date_add, play_count, play_date, rel_date, skip_count):
+				 track_count, year, date_add, play_count, play_date, rel_date, skip_count,loved):
 
 		self.name = name
 		self.artist = artist
@@ -28,6 +28,7 @@ class Track:
 		self.play_date = XMLDateToSQL(play_date,self.date_add)
 		self.rel_date = XMLDateToSQL(rel_date,self.date_add)
 		self.skip_count = int(skip_count)
+		self.loved = loved
 
 		
 

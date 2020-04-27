@@ -54,6 +54,8 @@ def main():
 			print("  lg ------ Library growth chart over time.")
 			print("  lc ------ Listen chart over time.")
 			print("  monchar - Chart of total number of songs by month.")
+			print("  sgp ----- Genre stream graph by plays.")
+			print("  sg ------ Genre stream graph by songs in library.")
 			print()
 			print("Lists:")
 			print("  tas ----- Top 10 artists by song count, pass integer to change list length.")
@@ -77,7 +79,10 @@ def main():
 
 		elif(u_input == "lc"): #listen chart over time
 			lib.listenChart()
-
+		elif(u_input == "sgp"):
+			lib.GenreStreamGraphPlays()
+		elif(u_input == "sg"):
+			lib.GenreStreamGraph()
 		elif(u_input[:3] == "tas"): 
 			if(len(u_input) > 3):
 				if(u_input.find(" ") == -1):

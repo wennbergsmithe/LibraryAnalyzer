@@ -8,12 +8,17 @@ from SQLConnector import DBConnector
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from ipywidgets import interact
 import squarify
 from matplotlib.ticker import FuncFormatter
 from os import path
 from globals import db
 import altair as alt
 import pandas as pd
+import seaborn as sns
+from vega_datasets import data
+import webbrowser
+import os
 
 # Updates database from a pre-exported file in the lib_backups directory. 
 # Itunes no longer automatically update the xml file, so it must be exported manually through itunes app. 
@@ -49,41 +54,90 @@ def updateDBFromXML(arg):
 			else:
 				more = False
 			i += 1
-
-
-
-def GenreStackPlot():
-	#incomplete
+def GenreStreamGraphPlays():
 	genres = []
 	years = []
 	counts = []
-	db.query("SELECT COUNT(id) count, genre FROM library GROUP BY genre ORDER BY count DESC LIMIT 10;")
+	db.query("SELECT COUNT(id) count, genre FROM library GROUP BY genre ORDER BY count DESC LIMIT 27;")
 	
 	for genre in db.rs:
  		genres.append(genre['genre'])
 
-	db.query("SELECT DISTINCT(YEAR(date_added)) as yr FROM library ORDER BY yr;")
+	data = []
+	db.query("SELECT DISTINCT YEAR(listen_date) year FROM listening_history  ORDER BY year;")
+	years = [item['year'] for item in db.rs]
+	print("Gathering data... This might take a bit")
+	for year in years:
+		for month in range(1,13):
+			for genre in genres:
+				db.query("SELECT count(record_id) count FROM listening_history LEFT JOIN library ON track_id = id WHERE genre = '" + genre + "' AND MONTH(listen_date) = " + str(month) + " AND YEAR(listen_date) = " + str(year)+ ";")
+				for item in db.rs:
 
-	for rslt in db.rs:
-		years.append(rslt['yr'])
-	for genre in genres:
+					if(month<10):
+						s_month = "0" + str(month)
+					else:
+						s_month = str(month)
+					date = str(year) + "-" + s_month + "-01T01:00:00.000Z"
+					# print(date)
+					temp = {"date": date, "genre":genre, "count": item['count']}
+					data.append(temp)
+# , scale=alt.Scale(domain=(0,1000))
+
+	df = pd.DataFrame(data=data)
+	streamgraph= alt.Chart(df,width=1250, height=750).mark_area(interpolate="basis").encode(
+	    alt.X('yearmonth(date):T',
+	        axis=alt.Axis( domain=False, tickSize=0)
+	    ),
+	    alt.Y('count:Q', stack='center', axis=alt.Axis(labels=False, domain=False, tickSize=0)),
+	    alt.Color('genre:N',
+	        scale=alt.Scale(scheme='tableau20'),
+	    ),tooltip=['genre','count']
+	    
+	).interactive().configure(background='#DDEEFF')
+	streamgraph.save("output.html")
+	webbrowser.open('file://' + os.path.realpath("output.html"))
+
+def GenreStreamGraph():
+	genres = []
+	years = []
+	counts = []
+	db.query("SELECT COUNT(id) count, genre FROM library GROUP BY genre ORDER BY count DESC LIMIT 27;")
 	
-		temp = []
-		for year in years:
-			db.query("SELECT COUNT(id) as count FROM library where genre = '" + genre + "'AND YEAR(date_added) = " + str(year) + ";")
-			
-			for rslt in db.rs:
-				temp.append(rslt['count'])
+	for genre in db.rs:
+ 		genres.append(genre['genre'])
 
-		counts.append(temp)
+	data = []
+	db.query("SELECT DISTINCT YEAR(date_added) year FROM library  ORDER BY year;")
+	years = [item['year'] for item in db.rs]
+	print("Gathering data... This might take a bit")
+	for year in years:
+		for month in range(1,13):
+			for genre in genres:
+				db.query("SELECT count(id) count FROM library WHERE genre = '" + genre + "' AND MONTH(date_added) = " + str(month) + " AND YEAR(date_added) = " + str(year)+ ";")
+				for item in db.rs:
 
-	y = np.vstack(counts)
-	labels = genres
-	plt.stackplot(years, counts, labels=labels)
-	plt.legend(loc='upper left')
-	plt.show()
+					if(month<10):
+						s_month = "0" + str(month)
+					else:
+						s_month = str(month)
+					date = str(year) + "-" + s_month + "-01T01:00:00.000Z"
+					# print(date)
+					data.append({"date": date, "genre":genre, "count": item['count']})
+# , scale=alt.Scale(domain=(0,1000))
 
-	
+	df = pd.DataFrame(data=data)
+	streamgraph= alt.Chart(df,width=1250, height=750).mark_area(interpolate="basis").encode(
+	    alt.X('yearmonth(date):T',
+	        axis=alt.Axis( domain=False, tickSize=0)
+	    ),
+	    alt.Y('count:Q', stack='center', axis=alt.Axis(labels=False, domain=False, tickSize=0)),
+	    alt.Color('genre:N',
+	        scale=alt.Scale(scheme='tableau20'),
+	    ),tooltip=['genre','count']
+	    
+	).interactive().configure(background='#DDEEFF')
+	streamgraph.save("output.html")
+	webbrowser.open('file://' + os.path.realpath("output.html"))
 
 def ArtistTreeMap():
 
@@ -140,6 +194,70 @@ def GenreTreeMap():
 	plt.show()
 
 
+def StripPlot():
+	db.query("SELECT count(record_id) count, genre FROM listening_history LEFT JOIN library on track_id = id GROUP BY genre ORDER BY count DESC LIMIT 10;")
+	genres = []
+	for item in db.rs:
+		genres.append(item['genre'])
+	songs = []
+
+	max_play = 0
+	for genre in genres:
+		db.query("SELECT loved, genre, play_count, date_added FROM listening_history LEFT JOIN library ON track_id = id WHERE  genre = '" + genre + "' AND year(listen_date) = 2020 and month(listen_date) = 2;") # OR month(listen_date) = 2);")
+		# genre = '" + genre + "' AND   
+		# -- WHERE year(date_added) = 2020 and (month(date_added) = 3 OR month(date_added) = 4);
+		
+		for item in db.rs:
+			if item['loved'] == 0:
+				loved = False
+			else:
+				loved = True
+			temp = {"genre": item['genre'], "count": item['play_count'],"loved":loved,"sk":item['date_added']}
+			if(int(item['play_count']) > max_play):
+				max_play = int(item['play_count'])
+
+			songs.append(temp)
+
+	if(max_play < 50):
+		max_play = 50
+
+	df = pd.DataFrame(data=songs)
+	stripplot =  alt.Chart(df, width=100, height=500).mark_point(size=30,filled=True).encode(
+	    x=alt.X(
+	        'jitter:Q',
+	        title=None,
+	        axis=alt.Axis(values=[0], ticks=True, grid=False, labels=False),
+	        scale=alt.Scale(),
+	    ),
+	    y=alt.Y('count:Q', scale=alt.Scale(domain=(0,max_play))),
+	    color=alt.Color('genre:N',legend=None),
+	    # size ='count:Q',
+	    shape = alt.Shape(
+	       "loved:N",
+	        scale = alt.Scale(range=["circle", "triangle"],zero=True)),
+	    #filled='true:B',
+	    column=alt.Column(
+	        'genre:N',
+	        header=alt.Header(
+	            labelAngle=-90,
+	            titleOrient='top',
+	            labelOrient='bottom',
+	            labelAlign='right',
+	            labelPadding=3,
+	        ),
+	    ),
+	).transform_calculate(
+	    # Generate Gaussian jitter with a Box-Muller transform
+	    jitter='sqrt(-2*log(random()))*cos(2*PI*random())'
+	).configure_facet(
+	    spacing=0
+	).configure_view(
+	    stroke=None
+	)
+	stripplot.save("output.html")
+	webbrowser.open('file://' + os.path.realpath("output.html"))
+
+
 # overall library growth over time
 # command: lg
 def LibGrowthChart():
@@ -147,12 +265,44 @@ def LibGrowthChart():
 	y = []
 	x = []
 	i = 0
-	db.query("SELECT DATE(date_added) AS d FROM library ORDER BY d ASC;")
+	db.query("SELECT DISTINCT(YEAR(date_added)) yr FROM library ORDER BY yr;")
+	years = [item['yr'] for item in db.rs]
 
-	for date in db.rs:
-		i+=1
-		x.append(date['d'])
-		y.append(i)
+	for year in years:
+		for mo in range(1,12):
+
+			# db.query("SELECT COUNT(id) count FROM library WHERE (YEAR(date_added) = " + str(year) + " AND MONTH(date_added) < " + str(mo) + ") OR YEAR(date_added) < " + str(year) + ";")
+			# total = db.rs[0]['count']
+			db.query("SELECT COUNT(id) count FROM library WHERE YEAR(date_added) = " + str(year) + " AND MONTH(date_added) = " + str(mo) + ";")
+			count = db.rs[0]['count']
+			
+			# change = count - total
+
+			x.append(year + mo/12)
+			y.append(count)
+
+	print("Be sure to close chart window before continuing.")
+	plt.plot(x,y)
+	plt.gcf().autofmt_xdate() 
+	plt.show()
+
+def CoronaGrowthChart():
+	print("Gathering data... ")
+	y = []
+	x = []
+	i = 0
+
+	# db.query("SELECT COUNT(id) count FROM library WHERE (YEAR(date_added) = " + str(year) + " AND MONTH(date_added) < " + str(mo) + ") OR YEAR(date_added) < " + str(year) + ";")
+	# total = db.rs[0]['count']
+	db.query("SELECT count(id) count, DATE(date_added) date FROM library WHERE YEAR(date_added) = 2020 group by date ORder by date asc;")
+	for item in db.rs:
+		x.append(item['date'])
+		y.append(item['count'])
+	
+		# change = count - total
+
+		# x.append(2020+ mo/12)
+		# y.append(count)
 
 	print("Be sure to close chart window before continuing.")
 	plt.plot(x,y)
@@ -166,7 +316,7 @@ def CoronaListenChart():
 	x = []
 	print("Gathering data...")
 	global db 
-	db.query("SELECT COUNT(record_id) AS count, DATE(listen_date) AS date FROM listening_history WHERE DATE(listen_date) > '2020-02-01' GROUP BY date ORDER BY date;")
+	db.query("SELECT COUNT(record_id) AS count, DATE(listen_date) AS date FROM listening_history WHERE YEAR(listen_date) > 2019 GROUP BY date ORDER BY date;")
 
 	for date in db.rs:
 		x.append(date['date'])
@@ -212,6 +362,42 @@ def TopXArtistsBySongs(leng=10):
 		print()
 		
 
+def GenreGrowthChart():
+	genres = []
+	years = []
+	counts = []
+	db.query("SELECT COUNT(id) count, genre FROM library GROUP BY genre ORDER BY count DESC LIMIT 5;")
+	
+	for genre in db.rs:
+ 		genres.append(genre['genre'])
+
+	data = []
+	db.query("SELECT DISTINCT YEAR(date_added) year FROM library  ORDER BY year;")
+	years = [item['year'] for item in db.rs]
+	for year in years:
+		for month in range(1,12):
+			if year == 2020 and month > 4:
+				break;
+			for genre in genres:
+				db.query("SELECT count(id) count FROM library WHERE genre = '" + genre + "' AND MONTH(date_added) = " + str(month) + " AND YEAR(date_added) = " + str(year)+ ";")
+				for item in db.rs:
+
+					if(month<10):
+						s_month = "0" + str(month)
+					else:
+						s_month = str(month)
+					date = str(year) + "-" + s_month + "-01T00:00:00.000Z"
+					data.append({"date": date, "genre":genre, "count": item['count']})
+
+	df = pd.DataFrame(data=data)
+	lines = alt.Chart(df,width=1250, height=750).mark_line().encode(
+	    x='yearmonth(date)',
+	    y='count',
+	    color='genre',
+	    # strokeDash='genre',
+	).interactive()
+	lines.save("output.html")
+	webbrowser.open('file://' + os.path.realpath("output.html"))
 
 def SongSkipProbability(x, asc=1, zeros_ones=0):
 	# This function calculates the probability of skipping each song and displays in a list of x length.
@@ -362,10 +548,8 @@ def TopXSongsByPlays(x=10):
 		print("Play Count: " + str(song['play_count']))
 		print()
 
-db.execute("USE musicdata;")
-GenreTreeMap()
-db.disconnect()
-
-
+# db.execute("Use MusicData")
+# GenreStreamGraphPlays()
+# db.disconnect()
 
 
