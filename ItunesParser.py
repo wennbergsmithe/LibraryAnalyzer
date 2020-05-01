@@ -181,7 +181,7 @@ class iTunesParser:
 						stmt = "INSERT INTO listening_history (track_id, listen_date, listen_count)"
 						stmt += "    VALUES ( " + str(track_id) + ","
 						stmt += "   DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY),"
-						stmt += "            1);"
+						stmt += "             " + str(track.play_count) + ");"
 						db.execute(stmt)
 																		# for new plays and new skips:
 					stmt = "UPDATE library "								# update data in library

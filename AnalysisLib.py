@@ -16,7 +16,6 @@ from globals import db
 import altair as alt
 import pandas as pd
 import seaborn as sns
-from vega_datasets import data
 import webbrowser
 import os
 
@@ -77,7 +76,7 @@ def GenreStreamGraphPlays():
 						s_month = "0" + str(month)
 					else:
 						s_month = str(month)
-					date = str(year) + "-" + s_month + "-01T01:00:00.000Z"
+					date = str(year) + "-" + s_month# + "-01T01:00:00.000Z"
 					# print(date)
 					temp = {"date": date, "genre":genre, "count": item['count']}
 					data.append(temp)
@@ -85,7 +84,7 @@ def GenreStreamGraphPlays():
 
 	df = pd.DataFrame(data=data)
 	streamgraph= alt.Chart(df,width=1250, height=750).mark_area(interpolate="basis").encode(
-	    alt.X('yearmonth(date):T',
+	    alt.X('date:T',
 	        axis=alt.Axis( domain=False, tickSize=0)
 	    ),
 	    alt.Y('count:Q', stack='center', axis=alt.Axis(labels=False, domain=False, tickSize=0)),
@@ -94,8 +93,8 @@ def GenreStreamGraphPlays():
 	    ),tooltip=['genre','count']
 	    
 	).interactive().configure(background='#DDEEFF')
-	streamgraph.save("output.html")
-	webbrowser.open('file://' + os.path.realpath("output.html"))
+	streamgraph.save("list_stream.html")
+	webbrowser.open('file://' + os.path.realpath("list_stream.html"))
 
 def GenreStreamGraph():
 	genres = []
@@ -120,14 +119,14 @@ def GenreStreamGraph():
 						s_month = "0" + str(month)
 					else:
 						s_month = str(month)
-					date = str(year) + "-" + s_month + "-01T01:00:00.000Z"
+					date = str(year) + "-" + s_month #+ "-01T01:00:00.000Z"
 					# print(date)
 					data.append({"date": date, "genre":genre, "count": item['count']})
 # , scale=alt.Scale(domain=(0,1000))
 
 	df = pd.DataFrame(data=data)
 	streamgraph= alt.Chart(df,width=1250, height=750).mark_area(interpolate="basis").encode(
-	    alt.X('yearmonth(date):T',
+	    alt.X('date:T',
 	        axis=alt.Axis( domain=False, tickSize=0)
 	    ),
 	    alt.Y('count:Q', stack='center', axis=alt.Axis(labels=False, domain=False, tickSize=0)),
@@ -136,11 +135,11 @@ def GenreStreamGraph():
 	    ),tooltip=['genre','count']
 	    
 	).interactive().configure(background='#DDEEFF')
-	streamgraph.save("output.html")
-	webbrowser.open('file://' + os.path.realpath("output.html"))
+	streamgraph.save("lib_stream.html")
+	webbrowser.open('file://' + os.path.realpath("lib_stream.html"))
 
 def ArtistTreeMap():
-
+	print("Be sure to close chart window before continuing")
 	db.query("SELECT COUNT(id) as count, SUM(play_count) as pc, artist FROM library GROUP BY artist ORDER BY count DESC LIMIT 20;")
 
 	sizs = []
@@ -162,12 +161,12 @@ def ArtistTreeMap():
 	colors = [cmap(norm(value)) for value in plays]
 	 
 	# Change color
-	squarify.plot(sizes=sizs,label=labels, alpha=.8, color=colors )
+	squarify.plot(sizes=sizs,label=labels, alpha=.8)#, color=colors )
 	plt.axis('off')
 	plt.show()
 
 def GenreTreeMap():
-
+	print("Be sure to close chart window before continuing")
 	db.query("SELECT COUNT(id) as count, SUM(play_count) as pc, genre FROM library GROUP BY genre ORDER BY count DESC LIMIT 20;")
 
 	sizs = []
@@ -194,7 +193,9 @@ def GenreTreeMap():
 	plt.show()
 
 
-def StripPlot():
+def StripPlot(year=None):
+	print("Generating strip plot ...")
+	#year - oldest year added for songs you want to look at, takes all songs if null
 	db.query("SELECT count(record_id) count, genre FROM listening_history LEFT JOIN library on track_id = id GROUP BY genre ORDER BY count DESC LIMIT 10;")
 	genres = []
 	for item in db.rs:
@@ -203,16 +204,19 @@ def StripPlot():
 
 	max_play = 0
 	for genre in genres:
-		db.query("SELECT loved, genre, play_count, date_added FROM listening_history LEFT JOIN library ON track_id = id WHERE  genre = '" + genre + "' AND year(listen_date) = 2020 and month(listen_date) = 2;") # OR month(listen_date) = 2);")
-		# genre = '" + genre + "' AND   
-		# -- WHERE year(date_added) = 2020 and (month(date_added) = 3 OR month(date_added) = 4);
+		q = "SELECT name, artist, loved, genre, play_count, date_added FROM library WHERE  genre = '" + genre + "'"
+		if year != None:
+			q += " AND YEAR(date_added) > " + str(year) + ";"
+		else:
+			q += ";"
+		db.query(q)
 		
 		for item in db.rs:
 			if item['loved'] == 0:
 				loved = False
 			else:
 				loved = True
-			temp = {"genre": item['genre'], "count": item['play_count'],"loved":loved,"sk":item['date_added']}
+			temp = {"name": item['name'],"artist":item['artist'], "genre": item['genre'].lower(), "play_count": item['play_count'],"loved":loved,"sk":item['date_added']}
 			if(int(item['play_count']) > max_play):
 				max_play = int(item['play_count'])
 
@@ -229,8 +233,8 @@ def StripPlot():
 	        axis=alt.Axis(values=[0], ticks=True, grid=False, labels=False),
 	        scale=alt.Scale(),
 	    ),
-	    y=alt.Y('count:Q', scale=alt.Scale(domain=(0,max_play))),
-	    color=alt.Color('genre:N',legend=None),
+	    y=alt.Y('play_count:Q', scale=alt.Scale(domain=(0,max_play))),
+	    color=alt.Color('loved:N',legend=None),tooltip=['name','artist','play_count'],
 	    # size ='count:Q',
 	    shape = alt.Shape(
 	       "loved:N",
@@ -245,17 +249,19 @@ def StripPlot():
 	            labelAlign='right',
 	            labelPadding=3,
 	        ),
+	        spacing=10,
+
 	    ),
 	).transform_calculate(
 	    # Generate Gaussian jitter with a Box-Muller transform
 	    jitter='sqrt(-2*log(random()))*cos(2*PI*random())'
 	).configure_facet(
 	    spacing=0
-	).configure_view(
+	).interactive().configure_view(
 	    stroke=None
 	)
-	stripplot.save("output.html")
-	webbrowser.open('file://' + os.path.realpath("output.html"))
+	stripplot.save("StripPlot.html")
+	webbrowser.open('file://' + os.path.realpath("StripPlot.html"))
 
 
 # overall library growth over time
@@ -366,7 +372,7 @@ def GenreGrowthChart():
 	genres = []
 	years = []
 	counts = []
-	db.query("SELECT COUNT(id) count, genre FROM library GROUP BY genre ORDER BY count DESC LIMIT 5;")
+	db.query("SELECT COUNT(id) count, genre FROM library GROUP BY genre ORDER BY count DESC LIMIT 10;")
 	
 	for genre in db.rs:
  		genres.append(genre['genre'])
@@ -374,30 +380,34 @@ def GenreGrowthChart():
 	data = []
 	db.query("SELECT DISTINCT YEAR(date_added) year FROM library  ORDER BY year;")
 	years = [item['year'] for item in db.rs]
+	# years = [2020]
 	for year in years:
 		for month in range(1,12):
 			if year == 2020 and month > 4:
 				break;
 			for genre in genres:
 				db.query("SELECT count(id) count FROM library WHERE genre = '" + genre + "' AND MONTH(date_added) = " + str(month) + " AND YEAR(date_added) = " + str(year)+ ";")
+				
 				for item in db.rs:
 
 					if(month<10):
 						s_month = "0" + str(month)
 					else:
 						s_month = str(month)
-					date = str(year) + "-" + s_month + "-01T00:00:00.000Z"
+					date = str(year)+ "-" + s_month + "T00:00:00.000Z"
 					data.append({"date": date, "genre":genre, "count": item['count']})
 
 	df = pd.DataFrame(data=data)
+	print(df)
 	lines = alt.Chart(df,width=1250, height=750).mark_line().encode(
-	    x='yearmonth(date)',
+	    x='date',
 	    y='count',
 	    color='genre',
 	    # strokeDash='genre',
+	    tooltip=['genre','count']
 	).interactive()
-	lines.save("output.html")
-	webbrowser.open('file://' + os.path.realpath("output.html"))
+	lines.save("genre_grow.html")
+	webbrowser.open('file://' + os.path.realpath("genre_grow.html"))
 
 def SongSkipProbability(x, asc=1, zeros_ones=0):
 	# This function calculates the probability of skipping each song and displays in a list of x length.
@@ -549,7 +559,7 @@ def TopXSongsByPlays(x=10):
 		print()
 
 # db.execute("Use MusicData")
-# GenreStreamGraphPlays()
+# StripPlot()
 # db.disconnect()
 
 

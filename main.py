@@ -18,7 +18,7 @@ def main():
 	print("Welcome to Library Anylizer")
 
 	while(not done1):
-		db_name = input("Enter the database name or q to quit: ")
+		db_name = input("Enter the database name to login or create. q to quit: ")
 		if(db_name == "q"):
 			done1 = True
 			done2 = True
@@ -56,6 +56,9 @@ def main():
 			print("  monchar - Chart of total number of songs by month.")
 			print("  sgp ----- Genre stream graph by plays.")
 			print("  sg ------ Genre stream graph by songs in library.")
+			print("  strip --- Song playcount strip plot by genre.")
+			print("  gtmap --- Top 20 genre tree map.")
+			print("  atmap --- Top 20 artist tree map.")
 			print()
 			print("Lists:")
 			print("  tas ----- Top 10 artists by song count, pass integer to change list length.")
@@ -124,6 +127,8 @@ def main():
 							print("invalid list length")
 			else:
 				lib.SongSkipProbability(10)
+		elif(u_input == "strip"):
+			lib.StripPlot()
 
 		elif(u_input[:5] == "gprob"):
 			if(len(u_input) > 5):
@@ -210,7 +215,10 @@ def main():
 								print("invalid list length")
 			else:
 				lib.TopXGenresBySongs()
-
+		elif(u_input == "gtmap"):
+			lib.GenreTreeMap()
+		elif(u_input == "atmap"):
+			lib.ArtistTreeMap()
 		elif(u_input[:3] == "sbp"): 
 			if(len(u_input) > 3):
 					if(u_input.find(" ") == -1):
