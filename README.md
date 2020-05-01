@@ -4,6 +4,10 @@ This is a python application that stores Apple Music library information over ti
 
 This method was used as a free, but more labor inensive alternative to Apple's pre-existing APIs.
 
+FinalReport.pdf outlines the details and results of the project.
+
+charts.zip contains interactive charts produced by this program.
+
 In operating systems pre-Catalina, iTunes allowed 3rd party applications to have access to an updated XML file at all times. This support ended with MacOS Catalina. As a result, the XML file must be generated manually. 
 
 ### Dependencies:<br> 
