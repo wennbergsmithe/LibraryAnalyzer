@@ -4,7 +4,6 @@
 #
 # Track UDT used for storing track data at runtime
 
-from SQLConnector import DBConnector
 from datetime import datetime
 
 class Track:
