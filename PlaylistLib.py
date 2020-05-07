@@ -2,7 +2,6 @@
 # Written by Elijah Wennberg-Smith
 # Last Edited: 3.26.20
 
-from ItunesParser import iTunesParser
 from SQLConnector import DBConnector
 import re
 from globals import db

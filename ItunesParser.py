@@ -7,12 +7,8 @@
 
 import xml.etree.ElementTree as ElementTree
 from Track import Track
-from SQLConnector import DBConnector
 import progressbar
-import re
 from globals import db
-import squarify
-import matplotlib.pyplot as plt
 
 class iTunesParser:
 	#parses xml file from iTunes 

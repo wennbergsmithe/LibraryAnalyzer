@@ -2,20 +2,13 @@
 # Written by Elijah Wennberg-Smith
 # Last Edited: 3.26.20
 
-from Track import Track
 from ItunesParser import iTunesParser
-from SQLConnector import DBConnector
-import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from ipywidgets import interact
 import squarify
-from matplotlib.ticker import FuncFormatter
-from os import path
 from globals import db
 import altair as alt
 import pandas as pd
-import seaborn as sns
 import webbrowser
 import os
 
@@ -53,6 +46,7 @@ def updateDBFromXML(arg):
 			else:
 				more = False
 			i += 1
+
 def GenreStreamGraphPlays():
 	genres = []
 	years = []

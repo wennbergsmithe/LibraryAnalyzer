@@ -6,8 +6,6 @@
 
 import AnalysisLib as lib
 import PlaylistLib as plib
-from SQLConnector import DBConnector
-import mysql.connector
 from globals import db
 
 db_name = ""
@@ -23,10 +21,7 @@ def main():
 			done1 = True
 			done2 = True
 		else:	
-			try:
-				db.cursor.execute("USE " + db_name + ";")
-
-			except mysql.connector.Error as err:
+			if db.changeDB(db_name) == -1:
 				make = "z"
 				while(make != "y" and make != "n"):
 					make = input("This database does not exist. Would you like to create it? (y)es or (n)o: ")

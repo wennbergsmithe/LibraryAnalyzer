@@ -38,7 +38,13 @@ class DBConnector():
 			self.connection.commit()
 
 	def changeDB(self, dbName):
-		self.execute("USE "+ dbName + ";")
+		try:
+			self.execute("USE "+ dbName + ";")
+		except mysql.connector.Error as err:
+			print("Invalid database name.")
+			return -1
+		else:
+			return 1
 
 	def query(self,query):
 		try:
