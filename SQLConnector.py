@@ -28,7 +28,6 @@ class DBConnector():
 
 	def execute(self,statement):
 		try:
-			# print(query)
 			self.cursor.execute(statement)
 		except mysql.connector.Error as err:
 			print("SQL Error: {}".format(err))
@@ -36,6 +35,7 @@ class DBConnector():
 			return -1
 		finally:
 			self.connection.commit()
+		return 1
 
 	def changeDB(self, dbName):
 		try:

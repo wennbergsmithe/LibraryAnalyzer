@@ -145,8 +145,8 @@ class iTunesParser:
 				stmt += "             play_date, rel_date, skip_count, loved)"
 				stmt += "      VALUES ('" + track.name.replace("'","''") + "', '" + track.artist.replace("'","''") + "', '" + track.album.replace("'","''") + "', '" +  track.alb_artist.replace("'","''") + "', '"
 				stmt +=  track.comp.replace("'","''") + "', '" +  track.genre.replace("'","''") + "', '" +  track.kind.replace("'","''") + "', " +  str(track.total_time) + ", "
-				stmt += str(track.track_num) + ", " + str(track.track_count) + ", " + str(track.year)+ ", DATE_ADD('" +  str(track.date_add)+ "', INTERVAL -4 DAY), "
-				stmt += str(track.play_count)+ ", DATE_ADD('" +  str(track.play_date)+ "', INTERVAL -4 DAY), DATE_ADD('" +  str(track.rel_date) + "', INTERVAL -4 DAY), " + str(track.skip_count) + "," + str(track.loved) + ");"
+				stmt += str(track.track_num) + ", " + str(track.track_count) + ", " + str(track.year)+ ", DATE_ADD('" +  str(track.date_add)+ "', INTERVAL -4 HOUR), "
+				stmt += str(track.play_count)+ ", DATE_ADD('" +  str(track.play_date)+ "', INTERVAL -4 HOUR), DATE_ADD('" +  str(track.rel_date) + "', INTERVAL -4 HOUR), " + str(track.skip_count) + "," + str(track.loved) + ");"
 				db.execute(stmt)
 				last_id = db.cursor.lastrowid
 
@@ -155,7 +155,7 @@ class iTunesParser:
 					if(int(track.play_date[:4]) > 2000):
 						stmt = "INSERT INTO listening_history (track_id, listen_date, listen_count)"
 						stmt += "    VALUES (         " + str(last_id) + ","
-						stmt += "           DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY),"
+						stmt += "           DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 HOUR),"
 						stmt += "            1);"
 						db.execute(stmt)
 
@@ -176,14 +176,14 @@ class iTunesParser:
 						#if(db.rs == []):									# new listen record in listening history
 						stmt = "INSERT INTO listening_history (track_id, listen_date, listen_count)"
 						stmt += "    VALUES ( " + str(track_id) + ","
-						stmt += "   DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY),"
+						stmt += "   DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 HOUR),"
 						stmt += "             " + str(track.play_count) + ");"
 						db.execute(stmt)
 																		# for new plays and new skips:
 					stmt = "UPDATE library "								# update data in library
 					stmt += "  SET play_count =          " + str(track.play_count) + ", "
 					stmt += "      total_time =          " + str(track.total_time) + ", "
-					stmt += "      play_date = DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 DAY), "
+					stmt += "      play_date = DATE_ADD('" + str(track.play_date) + "', INTERVAL -4 HOUR), "
 					stmt += "      skip_count =          " + str(track.skip_count) + ", "
 					stmt += "      loved =               " + str(track.loved) + " "
 					stmt += "WHERE id = " + str(track_id) + ";"

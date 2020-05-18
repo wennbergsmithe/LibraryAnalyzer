@@ -21,7 +21,7 @@ def updateDBFromXML(arg):
 	if(arg != "a"):
 		fp = "lib_backups/" + arg
 		print(fp)
-		if(not path.exists(fp)):
+		if(not os.path.exists(fp)):
 			print("invalid xml file. Make sure to include file extension")
 			return
 		
@@ -37,7 +37,7 @@ def updateDBFromXML(arg):
 		while(more):
 			fp = "lib_backups/" + str(i) + ".xml"
 			print(fp)
-			if(path.exists(fp)):
+			if(os.path.exists(fp)):
 				parser = iTunesParser(fp)
 				print("Parsing " + fp)
 				parser.parse()
